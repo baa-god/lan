@@ -19,6 +19,11 @@ const (
 	Asciis         = Digits + AsciiLowercase + AsciiUppercase + Punctuation
 )
 
+type Pair[Key any, Value any] struct {
+	First  Key
+	Second Value
+}
+
 // ReadLastLine 读取 file 最后一行文本
 func ReadLastLine(file *os.File) (line string, err error) {
 	offset, err := file.Seek(-1, io.SeekEnd)
