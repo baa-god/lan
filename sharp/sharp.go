@@ -33,6 +33,13 @@ func Or[T any](r1 T, e T) T {
 	return e
 }
 
+func If[T any](b bool, v T, e T) T {
+	if b {
+		return v
+	}
+	return e
+}
+
 // ReadLastLine 读取 file 最后一行文本
 func ReadLastLine(file *os.File) (line string, err error) {
 	offset, err := file.Seek(-1, io.SeekEnd)
