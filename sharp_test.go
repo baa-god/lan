@@ -10,6 +10,6 @@ func TestFunc(t *testing.T) {
 	err := ip2region.InitIP2Region("ip2region.xdb")
 	fmt.Println("err:", err)
 
-	r := ip2region.MustSearch("223.198.167.223")
+	r := ip2region.MustSearch("192.168.1.241")
 	fmt.Printf("r: %+v\n", r)
 }

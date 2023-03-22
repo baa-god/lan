@@ -43,6 +43,10 @@ func MustSearch(ip string) (r *Region) {
 	return r
 }
 
+func IsIntranet(ip string) bool {
+	return MustSearch(ip).City == "内网IP"
+}
+
 func InitIP2Region(dbPath string) (err error) {
 	// 从 dbPath 加载 VectorIndex 缓存，把下述 vIndex 变量全局到内存里面。
 	vIndex, err := xdb.LoadVectorIndexFromFile(dbPath)
