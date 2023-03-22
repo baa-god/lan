@@ -44,6 +44,10 @@ func (f *File) ReadLastLine() (line string, err error) {
 }
 
 func (f *File) ReadFirstLine() (line string, err error) {
+	if _, err = f.Seek(0, io.SeekStart); err != nil {
+		return
+	}
+
 	scan := bufio.NewScanner(f)
 	scan.Split(bufio.ScanLines)
 
