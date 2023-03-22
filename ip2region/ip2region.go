@@ -11,7 +11,7 @@ var (
 )
 
 type Region struct {
-	Ip       string `json:"addr"`
+	IP       string `json:"ip"`
 	Country  string `json:"country"`
 	Region   string `json:"region"`
 	Province string `json:"province"`
@@ -32,7 +32,7 @@ func Search(ip string) (r *Region, err error) {
 		}
 	}
 
-	r = &Region{Ip: ip, Country: x[0], Region: x[1], Province: x[2], City: x[3]}
+	r = &Region{IP: ip, Country: x[0], Region: x[1], Province: x[2], City: x[3]}
 	return
 }
 
