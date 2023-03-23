@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -22,6 +23,14 @@ const (
 type Pair[Key any, Value any] struct {
 	First  Key
 	Second Value
+}
+
+func OpenFile(name string, flag int, perm os.FileMode) (f *File, err error) {
+	file, err := os.OpenFile(name, flag, perm)
+	if err != nil {
+		return
+	}
+	return &File{file}, err
 }
 
 func Or[T any](r1 T, e T) T {

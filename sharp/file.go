@@ -11,14 +11,6 @@ type File struct {
 	*os.File
 }
 
-func OpenFile(name string, flag int, perm os.FileMode) (f *File, err error) {
-	file, err := os.OpenFile(name, flag, perm)
-	if err != nil {
-		return
-	}
-	return &File{file}, err
-}
-
 // ReadLastLine 读取 file 最后一行文本
 func (f *File) ReadLastLine() (line string, err error) {
 	offset, err := f.Seek(-1, io.SeekEnd)
