@@ -48,9 +48,9 @@ func If[T any](b bool, v T, e T) T {
 	return e
 }
 
-func JsonUnmarshal(data []byte, v any) (err error) {
-	if data, err := json.Marshal(v); err == nil {
-		err = json.Unmarshal(data, v)
+func JsonUnmarshal(data any, output any) (err error) {
+	if v, err := json.Marshal(data); err == nil {
+		err = json.Unmarshal(v, output)
 	}
 	return
 }
