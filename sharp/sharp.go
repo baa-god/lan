@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"math/big"
 	"os"
 	"reflect"
@@ -39,6 +40,13 @@ func Or[T any](r1 T, e T) T {
 		return r1
 	}
 	return e
+}
+
+func ErrOr(err error) string {
+	if err != nil {
+		return err.Error()
+	}
+	return ""
 }
 
 func If[T any](b bool, v T, e T) T {
@@ -78,4 +86,13 @@ func HasSuffix(s string, a ...string) bool {
 		}
 	}
 	return false
+}
+
+func JwtSigned(key any, claims jwt.Claims) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	s, err := token.SignedString(key)
+	if err != nil {
+		panic(err)
+	}
+	return s
 }

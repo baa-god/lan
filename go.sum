@@ -1,3 +1,5 @@
+github.com/golang-jwt/jwt/v5 v5.0.0-rc.1 h1:tDQ1LjKga657layZ4JLsRdxgvupebc0xuPwRNuTfUgs=
+github.com/golang-jwt/jwt/v5 v5.0.0-rc.1/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20230205110531-05840c74e63c h1:s1xqzuKdzMJlCIh3TD36lZKGfLD4KT340s/NbrXgRIw=
 github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20230205110531-05840c74e63c/go.mod h1:C5LA5UO2ZXJrLaPLYtE1wUJMiyd/nwWaCO5cw/2pSHs=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
