@@ -35,6 +35,7 @@ func (f *File) ReadLastLine() (line string, err error) {
 	return
 }
 
+// ReadFirstLine 读取 file 第一一行文本
 func (f *File) ReadFirstLine() (line string, err error) {
 	if _, err = f.Seek(0, io.SeekStart); err != nil {
 		return
