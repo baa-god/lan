@@ -3,6 +3,7 @@ package sharp
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -36,6 +37,13 @@ func If[T any](b bool, v T, e T) T {
 		return v
 	}
 	return e
+}
+
+func JsonUnmarshal(data []byte, v any) (err error) {
+	if data, err := json.Marshal(v); err == nil {
+		err = json.Unmarshal(data, v)
+	}
+	return
 }
 
 func Rand(n int) (s string) {
