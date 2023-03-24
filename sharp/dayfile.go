@@ -71,7 +71,7 @@ func (f *DayHandler) Handle(ctx context.Context, r slog.Record) (err error) {
 		if b, err = json.Marshal(a.Value.Any()); err != nil {
 			return
 		}
-		fields += fmt.Sprintf("%s=%v ", a.Key, string(b))
+		fields += fmt.Sprintf("%s=%s ", a.Key, b)
 	})
 
 	prefix := r.Time.Format("2006-01-02 15:05:05.000")
