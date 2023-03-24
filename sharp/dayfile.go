@@ -22,6 +22,7 @@ type DayFile struct {
 
 type DayHandler struct {
 	slog.Handler
+	source string
 }
 
 func (f *DayFile) Write(b []byte) (n int, err error) {
@@ -29,7 +30,7 @@ func (f *DayFile) Write(b []byte) (n int, err error) {
 	defer f.mu.Unlock()
 
 	format := time.Now().Format(f.Format)
-	fileName := strings.TrimRight(f.Dir, "/") + "_day" + format + ".log"
+	fileName := strings.TrimRight(f.Dir, "/") + "/day_" + format + ".log"
 
 	if f.lastOpen != fileName {
 		if f.file != nil {
@@ -47,6 +48,8 @@ func (f *DayFile) Write(b []byte) (n int, err error) {
 }
 
 func (f *DayHandler) Handle(ctx context.Context, r slog.Record) error {
+	f.Handler.Handle(ctx, r)
+
 	level := "[" + r.Level.String() + "]"
 	switch r.Level {
 	case slog.LevelDebug:
@@ -71,15 +74,14 @@ func (f *DayHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	prefix := r.Time.Format("[2006-01-02 15:05:05.000]")
 	prefix = color.HEX("7970A9").Sprint(prefix)
-
-	msg := color.White.Sprint(r.Message)
 	fields = color.Cyan.Sprint(fields)
 
-	fmt.Println(prefix+" "+level, msg, fields)
+	fmt.Println(prefix, level, f.source, r.Message, fields)
 	return nil
 }
 
 func NewDayHandle(dir string) *DayHandler {
+	var h *DayHandler
 	opts := slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
@@ -92,6 +94,7 @@ func NewDayHandle(dir string) *DayHandler {
 				} else {
 					v = v[last:]
 				}
+				h.source = v
 				a.Value = slog.StringValue(v)
 			} else if a.Key == slog.TimeKey {
 				value := time.Now().Format("2006-01-02 15:04:05.000")
@@ -102,5 +105,6 @@ func NewDayHandle(dir string) *DayHandler {
 	}
 
 	w := &DayFile{Dir: dir, Format: "060102"}
-	return &DayHandler{Handler: opts.NewJSONHandler(w)}
+	h = &DayHandler{Handler: opts.NewJSONHandler(w)}
+	return h
 }
