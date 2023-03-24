@@ -56,6 +56,12 @@ func If[T any](b bool, v T, e T) T {
 	return e
 }
 
+func LastSource(file string) string {
+	last := strings.LastIndexByte(file, '/')
+	index := strings.LastIndexByte(file[:last], '/')
+	return file[index+1:]
+}
+
 func JsonUnmarshal(data any, output any) (err error) {
 	if v, err := json.Marshal(data); err == nil {
 		err = json.Unmarshal(v, output)

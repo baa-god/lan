@@ -2,10 +2,12 @@ package sharp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gookit/color"
 	"golang.org/x/exp/slog"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -22,7 +24,6 @@ type DayFile struct {
 
 type DayHandler struct {
 	slog.Handler
-	source string
 }
 
 func (f *DayFile) Write(b []byte) (n int, err error) {
@@ -47,10 +48,12 @@ func (f *DayFile) Write(b []byte) (n int, err error) {
 	return
 }
 
-func (f *DayHandler) Handle(ctx context.Context, r slog.Record) error {
-	f.Handler.Handle(ctx, r)
+func (f *DayHandler) Handle(ctx context.Context, r slog.Record) (err error) {
+	if err = f.Handler.Handle(ctx, r); err != nil {
+		return err
+	}
 
-	level := "[" + r.Level.String() + "]"
+	level := r.Level.String()
 	switch r.Level {
 	case slog.LevelDebug:
 		level = color.Magenta.Sprint(level)
@@ -64,38 +67,32 @@ func (f *DayHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	var fields string
 	r.Attrs(func(a slog.Attr) {
-		fields += fmt.Sprintf("%s=", a.Key)
-		if _, ok := a.Value.Any().(string); ok {
-			fields += `"` + a.Value.String() + `" `
-		} else {
-			fields += a.Value.String() + " "
+		var b []byte
+		if b, err = json.Marshal(a.Value.Any()); err != nil {
+			return
 		}
+		fields += fmt.Sprintf("%s=%v ", a.Key, string(b))
 	})
 
-	prefix := r.Time.Format("[2006-01-02 15:05:05.000]")
-	prefix = color.HEX("7970A9").Sprint(prefix)
-	fields = color.Cyan.Sprint(fields)
+	prefix := r.Time.Format("2006-01-02 15:05:05.000")
+	prefix = color.HEX("A9B7C6").Sprint(prefix)
 
-	fmt.Println(prefix, level, f.source, r.Message, fields)
-	return nil
+	_, file, line, _ := runtime.Caller(3)
+	source := LastSource(fmt.Sprint(file, ":", line))
+
+	fields = color.Cyan.Sprint(fields)
+	fmt.Println(prefix, "|", level, "|", source, ">", r.Message, fields)
+
+	return
 }
 
 func NewDayHandle(dir string) *DayHandler {
-	var h *DayHandler
 	opts := slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
-				v := a.Value.String()
-				last := strings.LastIndexByte(v, '/')
-				if index := strings.LastIndex(v[:last], "/"); index != -1 {
-					v = v[index+1:]
-				} else {
-					v = v[last:]
-				}
-				h.source = v
-				a.Value = slog.StringValue(v)
+				a.Value = slog.StringValue(LastSource(a.Value.String()))
 			} else if a.Key == slog.TimeKey {
 				value := time.Now().Format("2006-01-02 15:04:05.000")
 				a.Value = slog.StringValue(value)
@@ -105,6 +102,5 @@ func NewDayHandle(dir string) *DayHandler {
 	}
 
 	w := &DayFile{Dir: dir, Format: "060102"}
-	h = &DayHandler{Handler: opts.NewJSONHandler(w)}
-	return h
+	return &DayHandler{Handler: opts.NewJSONHandler(w)}
 }
