@@ -1,4 +1,4 @@
-package rec
+package log
 
 import (
 	"context"
@@ -6,13 +6,12 @@ import (
 	"github.com/gookit/color"
 	"golang.org/x/exp/slog"
 	"runtime"
-	"strings"
 )
 
 type Handler struct {
 	slog.Handler
-	attrs []slog.Attr
-	group slog.Attr
+	Attrs []slog.Attr
+	Group slog.Attr
 }
 
 func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
@@ -51,36 +50,30 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
 	var attrs []slog.Attr
 	r.Attrs(func(a slog.Attr) { attrs = append(attrs, a) })
 
-	if h.group.Key != "" {
+	if h.Group.Key != "" {
 		h.AddGroupAttr(attrs...)
-		attrs = []slog.Attr{h.group}
+		attrs = []slog.Attr{h.Group}
 	}
 
-	attrStr := AttrString(append(h.attrs, attrs...)...)
-	attrStr = color.Cyan.Sprint(attrStr)
+	s := AttrString(append(h.Attrs, attrs...)...)
+	s = color.Cyan.Sprint(s)
 
 	fmt.Printf(
 		"%s | %s | %s:%d > %s %s\n",
-		prefix, level, file, line, r.Message, attrStr,
+		prefix, level, file, line, r.Message, s,
 	)
-
-	if r.Level == LevelPanic {
-		// panic(r.Message)
-	} else if r.Level == LevelFatal {
-		// os.Exit(1)
-	}
 
 	return
 }
 
 func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	newHandler := h.Handler.WithAttrs(attrs)
-	handler := &Handler{Handler: newHandler, attrs: h.attrs, group: h.group}
+	handler := &Handler{Handler: newHandler, Attrs: h.Attrs, Group: h.Group}
 
-	if handler.group.Key != "" {
+	if handler.Group.Key != "" {
 		handler.AddGroupAttr(attrs...)
 	} else {
-		handler.attrs = append(h.attrs, attrs...)
+		handler.Attrs = append(h.Attrs, attrs...)
 	}
 
 	return handler
@@ -88,10 +81,10 @@ func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
 
 func (h *Handler) WithGroup(name string) slog.Handler {
 	newHandler := h.Handler.WithGroup(name)
-	handler := &Handler{Handler: newHandler, attrs: h.attrs, group: h.group}
+	handler := &Handler{Handler: newHandler, Attrs: h.Attrs, Group: h.Group}
 
-	if group := slog.Group(name); h.group.Key == "" {
-		handler.group = group
+	if group := slog.Group(name); h.Group.Key == "" {
+		handler.Group = group
 	} else {
 		handler.AddGroupAttr(group)
 	}
@@ -99,38 +92,8 @@ func (h *Handler) WithGroup(name string) slog.Handler {
 	return handler
 }
 
-func AttrString(attrs ...slog.Attr) (s string) {
-	for _, x := range attrs {
-		if v, ok := x.Value.Any().([]slog.Attr); ok {
-			s += x.Key + "{" + AttrString(v...) + "} "
-			continue
-		}
-
-		v, kind := x.Value.String(), x.Value.Kind()
-		if kind != slog.KindInt64 && kind != slog.KindUint64 &&
-			kind != slog.KindBool && kind != slog.KindDuration {
-			v = `"` + v + `"`
-		}
-
-		s += fmt.Sprintf("%s=%s ", x.Key, v)
-	}
-
-	return strings.TrimSuffix(s, " ")
-}
-
-func LastGroup(attr *slog.Attr) *slog.Attr {
-	if v, _ := attr.Value.Any().([]slog.Attr); v != nil {
-		for i := len(v) - 1; i >= 0; i-- {
-			if x := &v[i]; x.Value.Kind() == slog.KindGroup {
-				return LastGroup(x)
-			}
-		}
-	}
-	return attr
-}
-
 func (h *Handler) AddGroupAttr(attrs ...slog.Attr) {
-	v := &LastGroup(&h.group).Value
+	v := &LastGroup(&h.Group).Value
 	if v.Kind() == slog.KindGroup {
 		*v = slog.GroupValue(append(v.Group(), attrs...)...)
 	}

@@ -1,8 +1,9 @@
-package rec
+package log
 
 import (
 	"golang.org/x/exp/slog"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -38,10 +39,12 @@ func Error(msg string, args ...any) {
 
 func Panic(msg string, args ...slog.Attr) {
 	slog.LogAttrs(nil, LevelPanic, msg, args...)
+	panic(msg)
 }
 
 func Fatal(msg string, args ...slog.Attr) {
 	slog.LogAttrs(nil, LevelFatal, msg, args...)
+	os.Exit(1)
 }
 
 func SetDefault(w io.Writer) *slog.Logger {

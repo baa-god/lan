@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"math/big"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -24,14 +23,6 @@ const (
 type Pair[Key any, Value any] struct {
 	First  Key
 	Second Value
-}
-
-func OpenFile(name string, flag int, perm os.FileMode) (f *File, err error) {
-	file, err := os.OpenFile(name, flag, perm)
-	if err != nil {
-		return
-	}
-	return &File{file}, err
 }
 
 func Or[T any](r1 T, e T) T {
@@ -54,12 +45,6 @@ func If[T any](b bool, v T, e T) T {
 		return v
 	}
 	return e
-}
-
-func LastSource(file string) string {
-	last := strings.LastIndexByte(file, '/')
-	index := strings.LastIndexByte(file[:last], '/')
-	return file[index+1:]
 }
 
 func JsonUnmarshal(data any, output any) (err error) {
