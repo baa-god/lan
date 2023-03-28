@@ -18,14 +18,13 @@ type DayDir struct {
 	mu   sync.Mutex
 }
 
-func NewDayDir(dir string, lock bool, perm ...os.FileMode) (d *DayDir, err error) {
+func NewDayDir(dir string, lock bool, perm ...os.FileMode) *DayDir {
 	_perm := append(perm, 0)[0]
-	if err = os.Mkdir(dir, _perm); err != nil && !errors.Is(err, os.ErrExist) {
-		return
+	if err := os.Mkdir(dir, _perm); err != nil && !errors.Is(err, os.ErrExist) {
+		panic(err)
 	}
 
-	d = &DayDir{Dir: dir, Format: "20060102", lock: lock}
-	return
+	return &DayDir{Dir: dir, Format: "20060102", lock: lock}
 }
 
 func (d *DayDir) Write(b []byte) (n int, err error) {

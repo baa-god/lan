@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"math/big"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -45,6 +46,27 @@ func If[T any](b bool, v T, e T) T {
 		return v
 	}
 	return e
+}
+
+func BaseN(path string, n int) string {
+	var noHas bool
+	var base string
+	path = filepath.ToSlash(path)
+
+	for i, index := 0, 0; n > i && index != -1; i++ {
+		if index = strings.LastIndexByte(path, '/'); index > 0 {
+			base = path[index:] + base
+			path = path[:index]
+			continue
+		}
+		noHas = true
+	}
+
+	if noHas {
+		return path
+	}
+
+	return strings.TrimPrefix(base, "/")
 }
 
 func JsonUnmarshal(data any, output any) (err error) {

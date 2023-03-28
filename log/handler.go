@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
+	"github.com/baa-god/sharp/sharp"
 	"github.com/gookit/color"
 	"golang.org/x/exp/slog"
 	"runtime"
@@ -19,8 +20,8 @@ func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
-	pc, file, line, _ := runtime.Caller(4)
-	r.PC += pc + 4
+	pc, file, line, _ := runtime.Caller(3)
+	r.PC = pc + 1
 
 	if err = h.Handler.Handle(ctx, r); err != nil {
 		return err
@@ -58,10 +59,9 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
 	s := AttrString(append(h.Attrs, attrs...)...)
 	s = color.Cyan.Sprint(s)
 
-	fmt.Printf(
-		"%s | %s | %s:%d > %s %s\n",
-		prefix, level, file, line, r.Message, s,
-	)
+	source := fmt.Sprintf("%s:%d", file, line)
+	source = sharp.BaseN(source, 2)
+	fmt.Printf("%s | %s | %s > %s %s\n", prefix, level, source, r.Message, s)
 
 	return
 }
@@ -93,8 +93,7 @@ func (h *Handler) WithGroup(name string) slog.Handler {
 }
 
 func (h *Handler) AddGroupAttr(attrs ...slog.Attr) {
-	v := &LastGroup(&h.Group).Value
-	if v.Kind() == slog.KindGroup {
+	if v := &LastGroup(&h.Group).Value; v.Kind() == slog.KindGroup {
 		*v = slog.GroupValue(append(v.Group(), attrs...)...)
 	}
 }

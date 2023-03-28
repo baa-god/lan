@@ -1,10 +1,10 @@
 package log
 
 import (
+	"github.com/baa-god/sharp/sharp"
 	"golang.org/x/exp/slog"
 	"io"
 	"os"
-	"strings"
 )
 
 const (
@@ -47,16 +47,13 @@ func Fatal(msg string, args ...slog.Attr) {
 	os.Exit(1)
 }
 
-func SetDefault(w io.Writer) *slog.Logger {
+func SetDefault(w io.Writer) {
 	opts := slog.HandlerOptions{
 		AddSource: true,
 		Level:     LevelTrace,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
-				source := a.Value.String()
-				index := strings.LastIndexByte(source, '/')
-				index = strings.LastIndexByte(source[:index], '/')
-				a.Value = slog.StringValue(source[index+1:])
+				a.Value = slog.StringValue(sharp.BaseN(a.Value.String(), 2))
 			} else if a.Key == slog.TimeKey {
 				value := a.Value.Time().Format("2006-01-02 15:04:05.000")
 				a.Value = slog.StringValue(value)
@@ -67,6 +64,4 @@ func SetDefault(w io.Writer) *slog.Logger {
 
 	h := &Handler{Handler: opts.NewJSONHandler(w)}
 	slog.SetDefault(slog.New(h))
-
-	return slog.Default()
 }
