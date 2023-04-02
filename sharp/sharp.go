@@ -26,10 +26,11 @@ type Pair[Key any, Value any] struct {
 	Second Value
 }
 
-func Or[T any](r1 T, e T) T {
-	v := reflect.ValueOf(r1)
-	if v.IsValid() && !v.IsZero() {
-		return r1
+func Or[T any](v T, e T) T {
+	value := reflect.ValueOf(v)
+	if value.Kind() != reflect.Invalid &&
+		value.IsValid() && !value.IsZero() {
+		return v
 	}
 	return e
 }
@@ -99,6 +100,13 @@ func HasSuffix(s string, a ...string) bool {
 		}
 	}
 	return false
+}
+
+func TrimPrefix(s string, prefix ...string) string {
+	for _, x := range prefix {
+		s = strings.TrimPrefix(s, x)
+	}
+	return s
 }
 
 func JwtSigned(key any, claims jwt.Claims) string {

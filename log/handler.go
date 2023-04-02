@@ -20,8 +20,8 @@ func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
-	pc, file, line, _ := runtime.Caller(3)
-	r.PC = pc + 1
+	pc, file, line, _ := runtime.Caller(4)
+	r.PC = pc + 4
 
 	if err = h.Handler.Handle(ctx, r); err != nil {
 		return err
