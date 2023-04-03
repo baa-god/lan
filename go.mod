@@ -1,4 +1,4 @@
-module github.com/baa-god/sharp
+module github.com/baa-god/lan
 
 go 1.19
 

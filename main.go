@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/baa-god/sharp/wood"
+	"github.com/baa-god/lan/wood"
 	"os"
 )
 
