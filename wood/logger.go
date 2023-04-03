@@ -16,23 +16,19 @@ func (l *Logger) Trace(msg any, args ...slog.Attr) {
 }
 
 func (l *Logger) Debug(msg any, args ...any) {
-	m := fmt.Sprint(msg)
-	l.Logger.Debug(m, args...)
+	l.Logger.Debug(fmt.Sprint(msg), args...)
 }
 
 func (l *Logger) Info(msg any, args ...any) {
-	m := fmt.Sprint(msg)
-	l.Logger.Info(m, args...)
+	l.Logger.Info(fmt.Sprint(msg), args...)
 }
 
 func (l *Logger) Warn(msg any, args ...any) {
-	m := fmt.Sprint(msg)
-	l.Logger.Warn(m, args...)
+	l.Logger.Warn(fmt.Sprint(msg), args...)
 }
 
 func (l *Logger) Error(msg any, args ...any) {
-	m := fmt.Sprint(msg)
-	l.Logger.Error(m, args...)
+	l.Logger.Error(fmt.Sprint(msg), args...)
 }
 
 func (l *Logger) Panic(msg any, args ...slog.Attr) {
