@@ -22,11 +22,8 @@ func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
-	var pcs [1]uintptr
-	runtime.Callers(5, pcs[:])
-
-	r.PC = pcs[0]
-	frame, _ := runtime.CallersFrames([]uintptr{r.PC}).Next()
+	pc, file, line, _ := runtime.Caller(4)
+	r.PC = pc
 
 	if !h.isStd {
 		if err = h.Handler.Handle(ctx, r); err != nil {
@@ -50,7 +47,7 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
 	s := attrString(append(h.Attrs, attrs...)...)
 	s = color.Cyan.Sprint(s)
 
-	source := fmt.Sprintf("%s:%d", frame.File, frame.Line)
+	source := fmt.Sprintf("%s:%d", file, line)
 	source = strs.BaseN(source, 2)
 	fmt.Printf("%s | %s > %s %s\n", prefix, source, r.Message, s)
 
