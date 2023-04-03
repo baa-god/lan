@@ -6,11 +6,16 @@ import (
 	"golang.org/x/exp/slog"
 	"io"
 	"os"
+	"sync/atomic"
 )
 
 var (
-	defaultLogger = New(os.Stdout)
+	defaultLogger atomic.Value
 )
+
+func init() {
+	defaultLogger.Store(New(os.Stdout))
+}
 
 type Logger struct {
 	*slog.Logger
@@ -45,31 +50,31 @@ func (l *Logger) Fatal(msg any, args ...any) {
 }
 
 func Trace(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelTrace), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelTrace), fmt.Sprint(msg), args...)
 }
 
 func Debug(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelDebug), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelDebug), fmt.Sprint(msg), args...)
 }
 
 func Info(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelInfo), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelInfo), fmt.Sprint(msg), args...)
 }
 
 func Warn(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelWarn), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelWarn), fmt.Sprint(msg), args...)
 }
 
 func Error(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelError), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelError), fmt.Sprint(msg), args...)
 }
 
 func Panic(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelPanic), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelPanic), fmt.Sprint(msg), args...)
 }
 
 func Fatal(msg any, args ...any) {
-	defaultLogger.Log(nil, slog.Level(LevelFatal), fmt.Sprint(msg), args...)
+	Default().Log(nil, slog.Level(LevelFatal), fmt.Sprint(msg), args...)
 }
 
 func New(w io.Writer) *Logger {
@@ -96,10 +101,10 @@ func New(w io.Writer) *Logger {
 	return &Logger{Logger: slog.New(handler)}
 }
 
-func SetDefault(logger *Logger) {
-	defaultLogger = logger
+func SetDefault(l *Logger) {
+	defaultLogger.Store(l)
 }
 
 func Default() *Logger {
-	return defaultLogger
+	return defaultLogger.Load().(*Logger)
 }
