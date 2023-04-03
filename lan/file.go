@@ -1,4 +1,4 @@
-package sharp
+package lan
 
 import (
 	"bufio"
