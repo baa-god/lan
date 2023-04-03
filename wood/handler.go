@@ -23,9 +23,7 @@ func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
 
 func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
 	pc, file, line, _ := runtime.Caller(4)
-	r.PC = pc
-
-	if !h.isStd {
+	if r.PC = pc; !h.isStd {
 		if err = h.Handler.Handle(ctx, r); err != nil {
 			return err
 		}
