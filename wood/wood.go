@@ -1,46 +1,75 @@
 package wood
 
 import (
-	"github.com/baa-god/lan/lan"
+	"fmt"
+	"github.com/baa-god/lan/strs"
 	"golang.org/x/exp/slog"
 	"io"
 	"os"
 )
 
 var (
-	defaultLogger *Logger
+	defaultLogger = New(os.Stdout)
 )
 
-func init() {
-	defaultLogger = New(os.Stdout)
+type Logger struct {
+	*slog.Logger
 }
 
-func Trace(msg string, args ...slog.Attr) {
-	defaultLogger.Trace(msg, args...)
+func (l *Logger) Trace(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelTrace), fmt.Sprint(msg), args...)
 }
 
-func Debug(msg string, args ...any) {
-	defaultLogger.Debug(msg, args...)
+func (l *Logger) Debug(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelDebug), fmt.Sprint(msg), args...)
 }
 
-func Info(msg string, args ...any) {
-	defaultLogger.Info(msg, args...)
+func (l *Logger) Info(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelInfo), fmt.Sprint(msg), args...)
 }
 
-func Warn(msg string, args ...any) {
-	defaultLogger.Warn(msg, args...)
+func (l *Logger) Warn(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelWarn), fmt.Sprint(msg), args...)
 }
 
-func Error(msg string, args ...any) {
-	defaultLogger.Error(msg, args...)
+func (l *Logger) Error(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelError), fmt.Sprint(msg), args...)
 }
 
-func Panic(msg string, args ...slog.Attr) {
-	defaultLogger.Panic(msg, args...)
+func (l *Logger) Panic(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelPanic), fmt.Sprint(msg), args...)
 }
 
-func Fatal(msg string, args ...slog.Attr) {
-	defaultLogger.Fatal(msg, args...)
+func (l *Logger) Fatal(msg any, args ...any) {
+	l.Log(nil, slog.Level(LevelFatal), fmt.Sprint(msg), args...)
+}
+
+func Trace(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelTrace), fmt.Sprint(msg), args...)
+}
+
+func Debug(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelDebug), fmt.Sprint(msg), args...)
+}
+
+func Info(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelInfo), fmt.Sprint(msg), args...)
+}
+
+func Warn(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelWarn), fmt.Sprint(msg), args...)
+}
+
+func Error(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelError), fmt.Sprint(msg), args...)
+}
+
+func Panic(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelPanic), fmt.Sprint(msg), args...)
+}
+
+func Fatal(msg any, args ...any) {
+	defaultLogger.Log(nil, slog.Level(LevelFatal), fmt.Sprint(msg), args...)
 }
 
 func New(w io.Writer) *Logger {
@@ -49,7 +78,7 @@ func New(w io.Writer) *Logger {
 		Level:     LevelTrace,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
-				a.Value = slog.StringValue(lan.BaseN(a.Value.String(), 2))
+				a.Value = slog.StringValue(strs.BaseN(a.Value.String(), 2))
 			} else if a.Key == slog.TimeKey {
 				value := a.Value.Time().Format("2006-01-02 15:04:05.000")
 				a.Value = slog.StringValue(value)
@@ -61,6 +90,16 @@ func New(w io.Writer) *Logger {
 		},
 	}
 
-	handler := &Handler{Handler: opts.NewJSONHandler(w)}
+	isStd := w == os.Stdout || w == os.Stderr
+	handler := &Handler{Handler: opts.NewJSONHandler(w), isStd: isStd}
+
 	return &Logger{Logger: slog.New(handler)}
+}
+
+func SetDefault(logger *Logger) {
+	defaultLogger = logger
+}
+
+func Default() *Logger {
+	return defaultLogger
 }
