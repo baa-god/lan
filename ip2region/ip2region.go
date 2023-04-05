@@ -18,6 +18,10 @@ type Region struct {
 	City     string `json:"city"`
 }
 
+func (r Region) IsIntranet() bool {
+	return r.City == "内网IP"
+}
+
 func Search(ip string) (r *Region, err error) {
 	region, err := searcher.SearchByStr(ip)
 	if err != nil {
@@ -41,10 +45,6 @@ func MustSearch(ip string) (r *Region) {
 		r = &Region{}
 	}
 	return r
-}
-
-func IsIntranet(ip string) bool {
-	return MustSearch(ip).City == "内网IP"
 }
 
 func InitIP2Region(dbPath string) {
