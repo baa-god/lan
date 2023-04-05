@@ -11,15 +11,19 @@ var (
 )
 
 type Region struct {
-	IP       string `json:"ip"`
-	Country  string `json:"country"`
-	Region   string `json:"region"`
-	Province string `json:"province"`
-	City     string `json:"city"`
+	IP      string `json:"ip"`
+	Country string `json:"country"`
+	Region  string `json:"region"`
+	Prov    string `json:"prov"`
+	City    string `json:"city"`
 }
 
 func (r Region) IsIntranet() bool {
 	return r.City == "内网IP"
+}
+
+func (r Region) Valid() bool {
+	return !r.IsIntranet() && r.Prov != ""
 }
 
 func Search(ip string) (r *Region, err error) {
@@ -36,7 +40,7 @@ func Search(ip string) (r *Region, err error) {
 		}
 	}
 
-	r = &Region{IP: ip, Country: x[0], Region: x[1], Province: x[2], City: x[3]}
+	r = &Region{IP: ip, Country: x[0], Region: x[1], Prov: x[2], City: x[3]}
 	return
 }
 
