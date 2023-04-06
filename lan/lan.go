@@ -2,6 +2,7 @@ package lan
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	jsoniter "github.com/json-iterator/go"
 	"reflect"
 )
 
@@ -39,6 +40,13 @@ func If[T any](b bool, v T, e T) T {
 		return v
 	}
 	return e
+}
+
+func MapTo(m map[string]any, v any) (err error) {
+	if b, err := jsoniter.Marshal(m); err == nil {
+		err = jsoniter.Unmarshal(b, v)
+	}
+	return
 }
 
 func CopyMap[M1 ~map[K]V, M2 ~map[K]V, K comparable, V any](dst M1, src M2) M1 {
