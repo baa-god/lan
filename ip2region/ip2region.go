@@ -1,7 +1,7 @@
 package ip2region
 
 import (
-	"fmt"
+	"github.com/baa-god/lan/lan"
 	"github.com/lionsoul2014/ip2region/binding/golang/xdb"
 	"strings"
 )
@@ -16,6 +16,7 @@ type Region struct {
 	Region  string `json:"region"`
 	Prov    string `json:"prov"`
 	City    string `json:"city"`
+	Err     string `json:"err"`
 }
 
 func (r Region) IsIntranet() bool {
@@ -28,12 +29,8 @@ func (r Region) Valid() bool {
 
 func Search(ip string) (r *Region, err error) {
 	region, err := searcher.SearchByStr(ip)
-	if err != nil {
-		fmt.Printf("failed to SearchIP(%s): %s\n", ip, err)
-		return
-	}
-
 	x := strings.Split(region, "|")
+
 	for i := 0; i < len(x); i++ {
 		if x[i] == "0" {
 			x[i] = ""
@@ -41,14 +38,8 @@ func Search(ip string) (r *Region, err error) {
 	}
 
 	r = &Region{IP: ip, Country: x[0], Region: x[1], Prov: x[2], City: x[3]}
+	r.Err = lan.ErrOr(err)
 	return
-}
-
-func MustSearch(ip string) (r *Region) {
-	if r, _ = Search(ip); r == nil {
-		r = &Region{}
-	}
-	return r
 }
 
 func InitIP2Region(dbPath string) {
