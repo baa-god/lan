@@ -24,7 +24,7 @@ func (r Region) IsIntranet() bool {
 }
 
 func (r Region) Valid() bool {
-	return !r.IsIntranet() && r.Prov != ""
+	return !r.IsIntranet() && r.Country != ""
 }
 
 func Search(ip string) (r *Region, err error) {
