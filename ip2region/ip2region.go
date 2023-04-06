@@ -27,7 +27,7 @@ func (r Region) Valid() bool {
 	return !r.IsIntranet() && r.Country != ""
 }
 
-func Search(ip string) (r *Region, err error) {
+func Search(ip string) (r *Region) {
 	region, err := searcher.SearchByStr(ip)
 	x := strings.Split(region, "|")
 
