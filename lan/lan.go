@@ -42,7 +42,7 @@ func If[T any](b bool, v T, e T) T {
 	return e
 }
 
-func MapTo(m map[string]any, v any) (err error) {
+func MapTo(m any, v any) (err error) {
 	if b, err := jsoniter.Marshal(m); err == nil {
 		err = jsoniter.Unmarshal(b, v)
 	}
