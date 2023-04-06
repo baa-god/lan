@@ -1,13 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"github.com/baa-god/lan/ip2region"
+	"github.com/baa-god/lan/fib"
 )
 
 func main() {
-	ip2region.InitIP2Region("ip2region.xdb")
+	app := fib.New()
 
-	r := ip2region.MustSearch("192.168.1.237")
-	fmt.Printf("%+v\n", r)
+	app.Get("/test", func(c *fib.Ctx) error {
+		return c.Status(5000).SendString("hi")
+	})
+
+	app.Listen(":3000")
 }
