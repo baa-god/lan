@@ -25,8 +25,20 @@ func (l *Logger) Trace(msg any, args ...any) {
 	l.Log(nil, slog.Level(LevelTrace), fmt.Sprint(msg), args...)
 }
 
+func (l *Logger) Tracef(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelTrace), fmt.Sprintf(msg, a...))
+}
+
 func (l *Logger) Debug(msg any, args ...any) {
 	l.Log(nil, slog.Level(LevelDebug), fmt.Sprint(msg), args...)
+}
+
+func (l *Logger) Debugf(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelDebug), fmt.Sprintf(msg, a...))
+}
+
+func (l *Logger) Infof(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelInfo), fmt.Sprintf(msg, a...))
 }
 
 func (l *Logger) Info(msg any, args ...any) {
@@ -37,44 +49,88 @@ func (l *Logger) Warn(msg any, args ...any) {
 	l.Log(nil, slog.Level(LevelWarn), fmt.Sprint(msg), args...)
 }
 
+func (l *Logger) Warnf(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelWarn), fmt.Sprintf(msg, a...))
+}
+
 func (l *Logger) Error(msg any, args ...any) {
 	l.Log(nil, slog.Level(LevelError), fmt.Sprint(msg), args...)
+}
+
+func (l *Logger) Errorf(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelError), fmt.Sprintf(msg, a...))
 }
 
 func (l *Logger) Panic(msg any, args ...any) {
 	l.Log(nil, slog.Level(LevelPanic), fmt.Sprint(msg), args...)
 }
 
+func (l *Logger) Panicf(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelPanic), fmt.Sprintf(msg, a...))
+}
+
 func (l *Logger) Fatal(msg any, args ...any) {
 	l.Log(nil, slog.Level(LevelFatal), fmt.Sprint(msg), args...)
+}
+
+func (l *Logger) Fatalf(msg string, a ...any) {
+	l.Log(nil, slog.Level(LevelFatal), fmt.Sprintf(msg, a...))
 }
 
 func Trace(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelTrace), fmt.Sprint(msg), args...)
 }
 
+func Tracef(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelTrace), fmt.Sprintf(msg, a...))
+}
+
 func Debug(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelDebug), fmt.Sprint(msg), args...)
+}
+
+func Debugf(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelDebug), fmt.Sprintf(msg, a...))
 }
 
 func Info(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelInfo), fmt.Sprint(msg), args...)
 }
 
+func Infof(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelInfo), fmt.Sprintf(msg, a...))
+}
+
 func Warn(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelWarn), fmt.Sprint(msg), args...)
+}
+
+func Warnf(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelWarn), fmt.Sprintf(msg, a...))
 }
 
 func Error(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelError), fmt.Sprint(msg), args...)
 }
 
+func Errorf(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelError), fmt.Sprintf(msg, a...))
+}
+
 func Panic(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelPanic), fmt.Sprint(msg), args...)
 }
 
+func Panicf(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelPanic), fmt.Sprintf(msg, a...))
+}
+
 func Fatal(msg any, args ...any) {
 	Default().Log(nil, slog.Level(LevelFatal), fmt.Sprint(msg), args...)
+}
+
+func Fatalf(msg string, a ...any) {
+	Default().Log(nil, slog.Level(LevelFatal), fmt.Sprintf(msg, a...))
 }
 
 func New(w io.Writer) *Logger {
