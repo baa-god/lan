@@ -30,7 +30,7 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
 	}
 
 	level := Level(r.Level)
-	prefix := r.Time.Format("2006-01-02 15:05:05.000")
+	prefix := r.Time.Format("2006-01-02 15:04:05.000")
 	prefix = color.HEX("#A9B7C6").Sprint(prefix)
 	prefix += " | " + level.ColorString()
 

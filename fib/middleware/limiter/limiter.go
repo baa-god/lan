@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"golang.org/x/time/rate"
 	"sync"
 	"time"
