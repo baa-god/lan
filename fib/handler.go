@@ -1,6 +1,7 @@
 package fib
 
 import (
+	"fmt"
 	"github.com/elliotchance/pie/v2"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -18,15 +19,19 @@ func HandlerFunc(handlers ...Handler) []fiber.Handler {
 			return handler
 		}
 
-		fv := reflect.ValueOf(f) // 具体的处理方法
-		args := fv.Type()        // 方法类型
+		fv := reflect.ValueOf(f)       // 具体的处理方法
+		args, ctx := fv.Type(), &Ctx{} // 方法类型
 
 		return func(c *fiber.Ctx) (err error) {
 			var in []reflect.Value // 处理参数 | 1: 上下文, 2: 输入
 			if first := args.In(0); first == fiberCtxType {
 				in = append(in, reflect.ValueOf(c))
 			} else {
-				in = append(in, reflect.ValueOf(&Ctx{c}))
+				if ctx.Ctx != c {
+					ctx.Ctx = c
+					ctx.getArgs()
+				}
+				in = append(in, reflect.ValueOf(ctx))
 			}
 
 			if args.NumIn() == 2 {
@@ -77,6 +82,8 @@ func handleResult(c *fiber.Ctx, out ...reflect.Value) (err error) {
 	if err, _ = result.(error); err != nil && st == 0 {
 		return err
 	}
+
+	fmt.Println("accept --------------:", c.Get("Accept"))
 
 	if accept := c.Get("Accept"); accept != "" && accept != "*/*" {
 		return c.Format(result)

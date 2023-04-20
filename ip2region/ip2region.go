@@ -24,7 +24,7 @@ func (r Region) IsIntranet() bool {
 }
 
 func (r Region) Valid() bool {
-	return !r.IsIntranet() && r.Country != ""
+	return r.Country != "" && r.Prov != "" && r.City != ""
 }
 
 func Search(ip string) (r *Region) {
@@ -32,7 +32,7 @@ func Search(ip string) (r *Region) {
 	x := strings.Split(region, "|")
 
 	for i := 0; i < len(x); i++ {
-		if x[i] == "0" {
+		if x[i] == "0" || x[i] == "内网IP" {
 			x[i] = ""
 		}
 	}

@@ -20,13 +20,16 @@ func New(config ...Config) fiber.Handler {
 	f := pie.First(config)
 	return func(c *fiber.Ctx) (err error) {
 		if f.Skip != nil && f.Skip(c) {
-			return
+			return c.Next()
 		}
 
 		token := c.Get(fiber.HeaderAuthorization)
-		token = strs.TrimPrefix(token, "Bearer ?")
 		if token == "" {
-			return
+			token = c.Query(fiber.HeaderAuthorization)
+		}
+
+		if token = strs.TrimPrefix(token, "Bearer ?"); token == "" {
+			return c.Next()
 		}
 
 		value := reflect.New(reflect.TypeOf(f.Claims))
@@ -38,7 +41,7 @@ func New(config ...Config) fiber.Handler {
 
 		if err != nil {
 			if f.Failed == nil {
-				return c.SendString(err.Error())
+				return c.Status(403).SendString(err.Error())
 			}
 			return f.Failed(c, err)
 		}

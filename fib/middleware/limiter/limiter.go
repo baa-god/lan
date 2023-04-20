@@ -44,6 +44,7 @@ func New(config ...Config) fiber.Handler {
 		if limit == nil {
 			mu.Lock()
 			defer mu.Unlock()
+
 			limit = &Limiter{
 				Limiter: rate.NewLimiter(f.Limit, f.Burst),
 				Time:    time.Now(),

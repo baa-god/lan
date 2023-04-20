@@ -9,7 +9,6 @@ func New(allowOrigins, allowHeaders string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var allow bool
 		origin := c.Get(fiber.HeaderOrigin)
-		allowOrigins = strings.ReplaceAll(allowOrigins, " ", "")
 
 		for _, x := range strings.Split(allowOrigins, ",") {
 			if x == origin {
@@ -23,6 +22,9 @@ func New(allowOrigins, allowHeaders string) fiber.Handler {
 		}
 
 		allowHeaders = strings.ReplaceAll(allowHeaders, " ", "")
+		allowOrigins = strings.ReplaceAll(allowOrigins, " ", "")
+
+		c.Set(fiber.HeaderAccessControlAllowOrigin, allowOrigins)
 		c.Set(fiber.HeaderAccessControlAllowHeaders, allowHeaders)
 
 		if c.Method() == fiber.MethodOptions {
