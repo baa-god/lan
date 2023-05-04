@@ -35,7 +35,10 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) (err error) {
 	prefix += " | " + level.ColorString()
 
 	var attrs []slog.Attr
-	r.Attrs(func(a slog.Attr) { attrs = append(attrs, a) })
+	r.Attrs(func(a slog.Attr) bool {
+		attrs = append(attrs, a)
+		return true
+	})
 
 	if h.Group.Key != "" {
 		h.addGroupAttr(attrs...)
