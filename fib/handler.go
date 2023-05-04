@@ -87,8 +87,10 @@ func handleResult(c *fiber.Ctx, out ...reflect.Value) (err error) {
 	var b string
 
 	switch val := body.(type) {
-	case string, []byte:
-		b = fmt.Sprintf("%s", val)
+	case string:
+		b = val
+	case []byte:
+		b = string(val)
 	default:
 		b = fmt.Sprintf("%v", val)
 	}
