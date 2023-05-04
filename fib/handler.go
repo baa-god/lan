@@ -19,18 +19,16 @@ func HandlerFunc(handlers ...Handler) []fiber.Handler {
 			return handler
 		}
 
-		fv := reflect.ValueOf(f)       // 具体的处理方法
-		args, ctx := fv.Type(), &Ctx{} // 方法类型
+		fv := reflect.ValueOf(f) // 具体的处理方法
+		args := fv.Type()        // 方法类型
 
 		return func(c *fiber.Ctx) (err error) {
 			var in []reflect.Value // 处理参数 | 1: 上下文, 2: 输入
 			if first := args.In(0); first == fiberCtxType {
 				in = append(in, reflect.ValueOf(c))
 			} else {
-				if ctx.Ctx != c {
-					ctx.Ctx = c
-					ctx.getArgs()
-				}
+				ctx := &Ctx{}
+				ctx.getArgs()
 				in = append(in, reflect.ValueOf(ctx))
 			}
 
@@ -63,12 +61,12 @@ func handleResult(c *fiber.Ctx, out ...reflect.Value) (err error) {
 		return
 	}
 
-	st, result := 0, out[0].Interface()
-	if result == nil {
+	st, body := 0, out[0].Interface()
+	if body == nil {
 		return nil
 	}
 
-	if st, _ = result.(int); st > 0 {
+	if st, _ = body.(int); st > 0 {
 		if len(out) == 1 {
 			return c.SendStatus(st)
 		}
@@ -76,18 +74,33 @@ func handleResult(c *fiber.Ctx, out ...reflect.Value) (err error) {
 	}
 
 	if len(out) == 2 {
-		result = out[1].Interface()
+		body = out[1].Interface()
 	}
 
-	if err, _ = result.(error); err != nil && st == 0 {
+	if err, _ = body.(error); err != nil && st == 0 {
 		return err
 	}
 
-	fmt.Println("accept --------------:", c.Get("Accept"))
+	accept := c.Accepts("json", "xml", "html", "txt")
 
-	if accept := c.Get("Accept"); accept != "" && accept != "*/*" {
-		return c.Format(result)
+	c.Type(accept)
+	var b string
+
+	switch val := body.(type) {
+	case string, []byte:
+		b = fmt.Sprintf("%s", val)
+	default:
+		b = fmt.Sprintf("%v", val)
 	}
 
-	return c.JSON(result)
+	switch accept {
+	case "json":
+		return c.JSON(body)
+	case "xml":
+		return c.XML(body)
+	case "html":
+		return c.SendString("<p>" + b + "</p>")
+	}
+
+	return c.SendString(b)
 }

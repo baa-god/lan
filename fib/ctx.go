@@ -1,8 +1,10 @@
 package fib
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cast"
 	"strconv"
 )
@@ -46,6 +48,8 @@ func (c *Ctx) getArgs() {
 			c.args[string(key)] = string(value)
 		})
 	} else if c.Method() == "POST" {
-		_ = c.App().Config().JSONDecoder(c.Body(), &c.args)
+		dec := jsoniter.NewDecoder(bytes.NewReader(c.Body()))
+		dec.UseNumber()
+		_ = dec.Decode(&c.args)
 	}
 }
