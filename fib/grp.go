@@ -10,9 +10,11 @@ type Group struct {
 
 func (grp *Group) Use(args ...any) Router {
 	for i := 0; i < len(args); i++ {
-		if x, ok := args[i].(Handler); ok {
-			args[i] = HandlerFunc(x)
+		switch args[i].(type) {
+		case string, []string, fiber.Handler:
+			continue
 		}
+		args[i] = HandlerFunc(args[i])
 	}
 
 	grp.grp.Use(args...)

@@ -27,8 +27,7 @@ func HandlerFunc(handlers ...Handler) []fiber.Handler {
 			if first := args.In(0); first == fiberCtxType {
 				in = append(in, reflect.ValueOf(c))
 			} else {
-				ctx := &Ctx{}
-				ctx.getArgs()
+				ctx := NewCtx(c)
 				in = append(in, reflect.ValueOf(ctx))
 			}
 

@@ -1,13 +1,17 @@
 package signature
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/baa-god/lan/lan"
 	"github.com/baa-god/lan/strs"
 	"github.com/elliotchance/pie/v2"
 	"github.com/gofiber/fiber/v2"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cast"
 	"golang.org/x/exp/maps"
+	"math"
+	"time"
 
 	"strings"
 	"sync"
@@ -50,15 +54,10 @@ func New(secret string) fiber.Handler {
 				args[string(key)] = string(value)
 			})
 		} else if c.Method() == "POST" {
-			_ = c.App().Config().JSONDecoder(c.Body(), &args)
+			dec := jsoniter.NewDecoder(bytes.NewReader(c.Body()))
+			dec.UseNumber()
+			_ = dec.Decode(&args)
 		}
-
-		fmt.Println("args:", args)
-
-		/*
-		eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MTAwMDAxMTA3Mjk2NDM5NjAzNCwiQWRtaW4iOm51bGwsIlZpc2l0b3IiOnsiaWQiOjEwMDAwMTEwNzI5NjQzOTYwMzQsInNpdGUiOjM3LCJhZG1pbiI6MiwiaXAiOiIxOTIuMTY4LjEuMjQxIiwicHJvdiI6IiIsImNpdHkiOiIiLCJwaG9uZSI6IiIsImRldmljZSI6InBjIiwiY29ubiI6MH19.Lpn9qBg_zTyNeBwr66izI2
-		EBwusbxb3wJFXMJrG1_3k&Milli=1681971687919&Nonce=NVojMk8bhVOuF7G6VPhcQ06XAHKPICBj&mid=0&KEY=f*>Q(LIzj`_T!C*Wh2LQq6U/~'_i/na:
-		*/
 
 		for k, v := range args {
 			if k == "Authorization" || k == "Nonce" || k == "Milli" || k == "Signed" {
@@ -68,10 +67,10 @@ func New(secret string) fiber.Handler {
 		}
 
 		// 验证时间戳
-		// milli := time.Now().UnixMilli()
-		// if math.Abs(float64(milli-p.Milli)) > 1000*60 { // 超时1min
-		// 	return c.Status(fiber.StatusForbidden).SendString("request expired")
-		// }
+		msec := time.Now().UnixMilli()
+		if math.Abs(float64(msec-p.Milli)) > 1000*60 { // 超时1min
+			return c.Status(fiber.StatusForbidden).SendString("request expired")
+		}
 
 		params := lan.CopyMap(map[string]any{
 			"Authorization": p.Authorization,
@@ -100,16 +99,16 @@ func New(secret string) fiber.Handler {
 			return c.Status(fiber.StatusForbidden).SendString("signed expired")
 		}
 
-		// mu.Lock()
-		// defer mu.Unlock()
-		// saved[p.Signed] = true
-		//
-		// go func() {
-		// 	time.Sleep(time.Minute)
-		// 	mu.Lock()
-		// 	mu.Unlock()
-		// 	delete(saved, p.Signed)
-		// }()
+		mu.Lock()
+		defer mu.Unlock()
+		saved[p.Signed] = true
+
+		go func() {
+			time.Sleep(time.Minute)
+			mu.Lock()
+			mu.Unlock()
+			delete(saved, p.Signed)
+		}()
 
 		return c.Next()
 	}

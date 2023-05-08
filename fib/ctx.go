@@ -42,7 +42,9 @@ func (c *Ctx) ArgBool(key string) bool {
 	return cast.ToBool(c.Arg(key))
 }
 
-func (c *Ctx) getArgs() {
+func NewCtx(ctx *fiber.Ctx) *Ctx {
+	c := &Ctx{Ctx: ctx}
+
 	if c.args = map[string]any{}; c.Method() == "GET" {
 		c.Request().URI().QueryArgs().VisitAll(func(key, value []byte) {
 			c.args[string(key)] = string(value)
@@ -52,4 +54,6 @@ func (c *Ctx) getArgs() {
 		dec.UseNumber()
 		_ = dec.Decode(&c.args)
 	}
+
+	return c
 }
