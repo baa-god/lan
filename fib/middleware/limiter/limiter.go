@@ -12,6 +12,7 @@ type Config struct {
 	Burst    int
 	Duration time.Duration
 	Skip     func(*fiber.Ctx) bool
+	Start    func(c *fiber.Ctx) error
 	Key      func(*fiber.Ctx) string
 	Reached  func(*fiber.Ctx, time.Duration) error
 	Add429   bool
@@ -36,6 +37,10 @@ func New(config ...Config) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		if f.Skip != nil && f.Skip(c) {
 			return c.Next()
+		}
+
+		if f.Start != nil {
+			return f.Start(c)
 		}
 
 		key := f.Key(c)
