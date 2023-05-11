@@ -152,7 +152,7 @@ func New(w io.Writer) *Logger {
 	}
 
 	isStd := w == os.Stdout || w == os.Stderr
-	handler := &Handler{Handler: opts.NewJSONHandler(w), isStd: isStd}
+	handler := &Handler{Handler: slog.NewJSONHandler(w, &opts), isStd: isStd}
 
 	return &Logger{Logger: slog.New(handler)}
 }
