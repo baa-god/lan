@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Skip    func(*fiber.Ctx) bool
+	Skip    func(*fiber.Ctx, string) bool
 	Succeed func(*fiber.Ctx, jwt.Claims) error
 	Claims  jwt.Claims
 	Failed  func(*fiber.Ctx, error) error
@@ -19,16 +19,13 @@ type Config struct {
 func New(config ...Config) fiber.Handler {
 	f := pie.First(config)
 	return func(c *fiber.Ctx) (err error) {
-		if f.Skip != nil && f.Skip(c) {
-			return c.Next()
-		}
-
 		token := c.Get(fiber.HeaderAuthorization)
 		if token == "" {
 			token = c.Query(fiber.HeaderAuthorization)
 		}
 
-		if token = strs.TrimPrefix(token, "Bearer ?"); token == "" {
+		token = strs.TrimPrefix(token, "Bearer ?")
+		if f.Skip != nil && f.Skip(c, token) {
 			return c.Next()
 		}
 
