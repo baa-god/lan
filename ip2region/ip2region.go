@@ -37,7 +37,10 @@ func Search(ip string) (r *Region) {
 		}
 	}
 
-	r = &Region{IP: ip, Country: x[0], Region: x[1], Prov: x[2], City: x[3]}
+	prov := strings.TrimSuffix(x[2], "省")
+	city := strings.TrimSuffix(x[3], "市")
+
+	r = &Region{IP: ip, Country: x[0], Region: x[1], Prov: prov, City: city}
 	r.Err = lan.ErrOr(err)
 	return
 }

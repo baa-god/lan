@@ -10,7 +10,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cast"
 	"golang.org/x/exp/maps"
-	"math"
 	"time"
 
 	"strings"
@@ -67,10 +66,10 @@ func New(secret string) fiber.Handler {
 		}
 
 		// 验证时间戳
-		msec := time.Now().UnixMilli()
-		if math.Abs(float64(msec-p.Milli)) > 1000*60 { // 超时1min
-			return c.Status(fiber.StatusForbidden).SendString("request expired")
-		}
+		// msec := time.Now().UnixMilli()
+		// if math.Abs(float64(msec-p.Milli)) > 1000*60 { // 超时1min
+		// 	return c.Status(fiber.StatusForbidden).SendString("request expired")
+		// }
 
 		params := lan.CopyMap(map[string]any{
 			"Authorization": p.Authorization,
