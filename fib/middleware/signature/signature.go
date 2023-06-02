@@ -2,6 +2,7 @@ package signature
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/baa-god/lan/lan"
 	"github.com/baa-god/lan/strs"
@@ -30,7 +31,7 @@ var (
 	saved = map[string]bool{}
 )
 
-func New(secret string) fiber.Handler {
+func New(secrets []string) fiber.Handler {
 	return func(c *fiber.Ctx) (err error) {
 		p := Param{
 			Authorization: strs.TrimPrefix(c.Get("Authorization"), "Bearer ?"),
@@ -82,20 +83,23 @@ func New(secret string) fiber.Handler {
 			return fmt.Sprintf("%s=%v", key, params[key])
 		})
 
-		signed := strings.Join(append(signs, "KEY="), "&")
+		var allow bool
+		sortKeys := strings.Join(append(signs, "KEY="), "&")
 
-		if strs.SHA256(signed+secret) != p.Signed {
-			fmt.Println("path:", c.Path())
-			fmt.Println("signed+secret:", signed+secret)
-			return c.Status(fiber.StatusForbidden).SendString("signed invalid")
+		for _, x := range secrets {
+			if allow = strs.SHA256(sortKeys+x) == p.Signed; allow {
+				break
+			}
+		}
+
+		if !allow {
+			err = errors.New("signed invalid")
+		} else if _, ok := saved[p.Signed]; ok {
+			err = errors.New("signed expired")
 		}
 
 		if err != nil {
 			return c.Status(fiber.StatusForbidden).SendString(err.Error())
-		}
-
-		if _, ok := saved[p.Signed]; ok {
-			return c.Status(fiber.StatusForbidden).SendString("signed expired")
 		}
 
 		mu.Lock()
