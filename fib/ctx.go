@@ -3,9 +3,10 @@ package fib
 import (
 	"bytes"
 	"fmt"
+	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cast"
+	"net/url"
 	"strconv"
 )
 
@@ -43,14 +44,15 @@ func (c *Ctx) ArgBool(key string) bool {
 }
 
 func NewCtx(ctx *fiber.Ctx) *Ctx {
-	c := &Ctx{Ctx: ctx}
+	c := &Ctx{Ctx: ctx, args: map[string]any{}}
 
-	if c.args = map[string]any{}; c.Method() == "GET" {
-		c.Request().URI().QueryArgs().VisitAll(func(key, value []byte) {
-			c.args[string(key)] = string(value)
-		})
+	if c.Method() == "GET" {
+		query, _ := url.ParseQuery(c.Context().QueryArgs().String())
+		for k, v := range query {
+			c.args[k] = v[0]
+		}
 	} else if c.Method() == "POST" {
-		dec := jsoniter.NewDecoder(bytes.NewReader(c.Body()))
+		dec := sonic.ConfigFastest.NewDecoder(bytes.NewReader(c.Body()))
 		dec.UseNumber()
 		_ = dec.Decode(&c.args)
 	}
