@@ -11,7 +11,6 @@ import (
 type Config struct {
 	Skip    func(*fiber.Ctx, string) bool
 	Succeed func(*fiber.Ctx, jwt.Claims) error
-	Limit   func(*fiber.Ctx) error
 	Claims  jwt.Claims
 	Failed  func(*fiber.Ctx, error) error
 	Secret  []byte
@@ -20,12 +19,6 @@ type Config struct {
 func New(config ...Config) fiber.Handler {
 	f := pie.First(config)
 	return func(c *fiber.Ctx) (err error) {
-		if f.Limit != nil {
-			if e := f.Limit(c); e != nil {
-				return c.SendString(e.Error())
-			}
-		}
-
 		token := c.Get(fiber.HeaderAuthorization)
 		if token == "" {
 			token = c.Query(fiber.HeaderAuthorization)

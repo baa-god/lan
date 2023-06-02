@@ -2,9 +2,7 @@ package signature
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"github.com/baa-god/lan/lan"
 	"github.com/baa-god/lan/strs"
 	"github.com/elliotchance/pie/v2"
 	"github.com/gofiber/fiber/v2"
@@ -13,36 +11,35 @@ import (
 	"golang.org/x/exp/maps"
 	"time"
 
-	"strings"
 	"sync"
 	// "time"
 )
 
 type Param struct {
-	Authorization string `json:"Authorization"`
-	Milli         int64  `json:"Milli"`
-	Nonce         string `json:"Nonce"`
-	Signed        string `json:"Signed"`
-	Params        map[string]any
+	Auth   string `json:"Authorization"`
+	Milli  int64  `json:"Milli"`
+	Nonce  string `json:"Nonce"`
+	Signed string `json:"Signed"`
+	Params map[string]any
 }
 
 var (
-	mu    sync.Mutex
-	saved = map[string]bool{}
+	mu     sync.Mutex
+	caches = map[string]bool{}
 )
 
-func New(secrets []string) fiber.Handler {
+func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 	return func(c *fiber.Ctx) (err error) {
 		p := Param{
-			Authorization: strs.TrimPrefix(c.Get("Authorization"), "Bearer ?"),
-			Milli:         cast.ToInt64(c.Get("Milli")),
-			Nonce:         c.Get("Nonce"),
-			Signed:        fmt.Sprint(c.Get("Signed")),
-			Params:        map[string]any{},
+			Auth:   strs.TrimPrefix(c.Get("Authorization"), "Bearer ?"),
+			Milli:  cast.ToInt64(c.Get("Milli")),
+			Nonce:  c.Get("Nonce"),
+			Signed: fmt.Sprint(c.Get("Signed")),
+			Params: map[string]any{},
 		}
 
 		if p.Signed == "" {
-			p.Authorization = strs.TrimPrefix(c.Query("Authorization"), "Bearer ?")
+			p.Auth = strs.TrimPrefix(c.Query("Authorization"), "Bearer ?")
 			p.Milli = cast.ToInt64(c.Query("Milli"))
 			p.Nonce = c.Query("Nonce")
 			p.Signed = fmt.Sprint(c.Query("Signed"))
@@ -72,47 +69,53 @@ func New(secrets []string) fiber.Handler {
 		// 	return c.Status(fiber.StatusForbidden).SendString("request expired")
 		// }
 
-		params := lan.CopyMap(map[string]any{
-			"Authorization": p.Authorization,
-			"Nonce":         p.Nonce,
-			"Milli":         p.Milli,
-		}, p.Params)
+		// params := lan.CopyMap(map[string]any{
+		// 	"Authorization": p.Authorization,
+		// 	"Nonce":         p.Nonce,
+		// 	"Milli":         p.Milli,
+		// }, p.Params)
 
-		keys := pie.Sort(maps.Keys(params))
-		signs := pie.Map(keys, func(key string) string {
-			return fmt.Sprintf("%s=%v", key, params[key])
-		})
+		// signs := pie.Map(sortedKeys, func(key string) string {
+		// 	return fmt.Sprintf("%s=%v", key, params[key])
+		// })
+		// sortedArgs := strings.Join(append(signs, "KEY="), "&")
+
+		params := map[string]any{"Authorization": p.Auth, "Nonce": p.Nonce, "Milli": p.Milli}
+		maps.Copy(params, p.Params)
 
 		var allow bool
-		sortKeys := strings.Join(append(signs, "KEY="), "&")
+		var useSecret string
+		var sortedArgs string
+		sortedKeys := pie.Sort(maps.Keys(params))
 
+		for _, key := range sortedKeys {
+			sortedArgs += fmt.Sprint(key, "=", params[key], "&")
+		}
+
+		sortedArgs += "KEY="
 		for _, x := range secrets {
-			if allow = strs.SHA256(sortKeys+x) == p.Signed; allow {
+			if allow = strs.SHA256(sortedArgs+x) == p.Signed; allow {
+				useSecret = x
 				break
 			}
 		}
 
-		if !allow {
-			err = errors.New("signed invalid")
-		} else if _, ok := saved[p.Signed]; ok {
-			err = errors.New("signed expired")
-		}
-
-		if err != nil {
-			return c.Status(fiber.StatusForbidden).SendString(err.Error())
+		if _, ok := caches[p.Signed]; ok || !allow {
+			return c.Status(403).SendString("sign error!")
 		}
 
 		mu.Lock()
 		defer mu.Unlock()
-		saved[p.Signed] = true
+		caches[p.Signed] = true
 
 		go func() {
 			time.Sleep(time.Minute)
 			mu.Lock()
 			mu.Unlock()
-			delete(saved, p.Signed)
+			delete(caches, p.Signed)
 		}()
 
+		retSecret(c, useSecret)
 		return c.Next()
 	}
 }

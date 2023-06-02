@@ -12,10 +12,9 @@ type Config struct {
 	Burst    int
 	Duration time.Duration
 	Skip     func(*fiber.Ctx) bool
-	Start    func(c *fiber.Ctx) error
+	Pre      func(c *fiber.Ctx) error
 	Key      func(*fiber.Ctx) string
 	Reached  func(*fiber.Ctx, time.Duration) error
-	Add429   bool
 }
 
 var (
@@ -39,8 +38,10 @@ func New(config ...Config) fiber.Handler {
 			return c.Next()
 		}
 
-		if f.Start != nil {
-			return f.Start(c)
+		if f.Pre != nil {
+			if e := f.Pre(c); e != nil {
+				return c.SendString(e.Error())
+			}
 		}
 
 		key := f.Key(c)
@@ -66,9 +67,8 @@ func New(config ...Config) fiber.Handler {
 		}
 
 		if !limit.Allow() {
-			if limit.SetBurst(0); f.Add429 {
-				c.Status(fiber.StatusTooManyRequests)
-			}
+			limit.SetBurst(0)
+			c.Status(fiber.StatusTooManyRequests)
 			return f.Reached(c, f.Duration-time.Since(limit.Time))
 		}
 
