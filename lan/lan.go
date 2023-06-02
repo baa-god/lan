@@ -1,7 +1,6 @@
 package lan
 
 import (
-	"github.com/golang-jwt/jwt/v5"
 	jsoniter "github.com/json-iterator/go"
 	"reflect"
 )
@@ -47,13 +46,4 @@ func MapTo(m any, v any) (err error) {
 		err = jsoniter.Unmarshal(b, v)
 	}
 	return
-}
-
-func JwtSigned(key any, claims jwt.Claims) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	s, err := token.SignedString(key)
-	if err != nil {
-		panic(err)
-	}
-	return s
 }
