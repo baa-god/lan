@@ -69,17 +69,6 @@ func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 		// 	return c.Status(fiber.StatusForbidden).SendString("request expired")
 		// }
 
-		// params := lan.CopyMap(map[string]any{
-		// 	"Authorization": p.Authorization,
-		// 	"Nonce":         p.Nonce,
-		// 	"Milli":         p.Milli,
-		// }, p.Params)
-
-		// signs := pie.Map(sortedKeys, func(key string) string {
-		// 	return fmt.Sprintf("%s=%v", key, params[key])
-		// })
-		// sortedArgs := strings.Join(append(signs, "KEY="), "&")
-
 		params := map[string]any{"Authorization": p.Auth, "Nonce": p.Nonce, "Milli": p.Milli}
 		maps.Copy(params, p.Params)
 
@@ -89,7 +78,7 @@ func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 		sortedKeys := pie.Sort(maps.Keys(params))
 
 		for _, key := range sortedKeys {
-			sortedArgs += fmt.Sprint(key, "=", params[key], "&")
+			sortedArgs += fmt.Sprintf("%s=%v&", key, params[key])
 		}
 
 		sortedArgs += "KEY="
