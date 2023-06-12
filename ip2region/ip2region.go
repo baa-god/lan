@@ -1,6 +1,7 @@
 package ip2region
 
 import (
+	"fmt"
 	"github.com/baa-god/lan/lan"
 	"github.com/lionsoul2014/ip2region/binding/golang/xdb"
 	"strings"
@@ -28,6 +29,13 @@ func (r Region) Valid() bool {
 }
 
 func Search(ip string) (r *Region) {
+	r = &Region{IP: ip}
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("err:", err)
+		}
+	}()
+
 	region, err := searcher.SearchByStr(ip)
 	x := strings.Split(region, "|")
 
@@ -37,11 +45,12 @@ func Search(ip string) (r *Region) {
 		}
 	}
 
-	prov := strings.TrimSuffix(x[2], "省")
-	city := strings.TrimSuffix(x[3], "市")
-
-	r = &Region{IP: ip, Country: x[0], Region: x[1], Prov: prov, City: city}
+	r.Country = x[0]
+	r.Region = x[1]
+	r.Prov = strings.TrimSuffix(x[2], "省")
+	r.City = strings.TrimSuffix(x[3], "市")
 	r.Err = lan.ErrOr(err)
+
 	return
 }
 
