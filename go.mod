@@ -6,7 +6,7 @@ require (
 	github.com/bytedance/sonic v1.9.1
 	github.com/elliotchance/pie/v2 v2.7.0
 	github.com/go-playground/validator/v10 v10.14.0
-	github.com/gofiber/fiber/v2 v2.47.0
+	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/json-iterator/go v1.1.12
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20230205110531-05840c74e63c
