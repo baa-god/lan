@@ -1,7 +1,7 @@
 package lan
 
 import (
-	jsoniter "github.com/json-iterator/go"
+	"github.com/bytedance/sonic"
 	"reflect"
 )
 
@@ -42,8 +42,8 @@ func If[T any](b bool, v T, e T) T {
 }
 
 func MapTo(m any, v any) (err error) {
-	if b, err := jsoniter.Marshal(m); err == nil {
-		err = jsoniter.Unmarshal(b, v)
+	if b, err := sonic.Marshal(m); err == nil {
+		err = sonic.Unmarshal(b, v)
 	}
 	return
 }

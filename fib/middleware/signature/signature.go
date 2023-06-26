@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/baa-god/lan/strs"
+	"github.com/bytedance/sonic"
 	"github.com/elliotchance/pie/v2"
 	"github.com/gofiber/fiber/v2"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cast"
 	"golang.org/x/exp/maps"
 	"time"
@@ -51,7 +51,7 @@ func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 				args[string(key)] = string(value)
 			})
 		} else if c.Method() == "POST" {
-			dec := jsoniter.NewDecoder(bytes.NewReader(c.Body()))
+			dec := sonic.ConfigFastest.NewDecoder(bytes.NewReader(c.Body()))
 			dec.UseNumber()
 			_ = dec.Decode(&args)
 		}
