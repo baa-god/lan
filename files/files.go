@@ -1,4 +1,4 @@
-package lan
+package files
 
 import (
 	"bufio"
@@ -7,20 +7,8 @@ import (
 	"strings"
 )
 
-type File struct {
-	*os.File
-}
-
-func OpenFile(name string, flag int, perm os.FileMode) (f *File, err error) {
-	file, err := os.OpenFile(name, flag, perm)
-	if err != nil {
-		return
-	}
-	return &File{file}, err
-}
-
-// ReadLastLine 读取 file 最后一行文本
-func (f *File) ReadLastLine() (line string, err error) {
+// LastLine 读取 file 最后一行文本
+func LastLine(f *os.File) (line string, err error) {
 	offset, err := f.Seek(-1, io.SeekEnd)
 
 	for buffer := make([]byte, 1); offset >= 0; offset-- {
@@ -43,8 +31,8 @@ func (f *File) ReadLastLine() (line string, err error) {
 	return
 }
 
-// ReadFirstLine 读取 file 第一一行文本
-func (f *File) ReadFirstLine() (line string, err error) {
+// FirstLine 读取 file 第一行文本
+func FirstLine(f *os.File) (line string, err error) {
 	if _, err = f.Seek(0, io.SeekStart); err != nil {
 		return
 	}

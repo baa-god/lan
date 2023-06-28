@@ -59,8 +59,3 @@ func NewCtx(ctx *fiber.Ctx) *Ctx {
 
 	return c
 }
-
-func (c *Ctx) Abort() error {
-	c.Route().Handlers = nil
-	return nil
-}

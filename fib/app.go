@@ -2,8 +2,6 @@ package fib
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 type Handler any
@@ -21,17 +19,7 @@ type App struct {
 }
 
 func New() *App {
-	app := fiber.New()
-
-	app.Use(
-		recover.New(recover.Config{EnableStackTrace: true}),
-		logger.New(logger.Config{
-			Format:     "${time} |${status}| ${ip} | ${method} ${path} ${queryParams} ${body}\n",
-			TimeFormat: "2006-01-02 15:04:05",
-		}),
-	)
-
-	return &App{App: app}
+	return &App{App: fiber.New()}
 }
 
 func (app *App) Use(args ...any) Router {
