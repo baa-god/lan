@@ -2,7 +2,6 @@ package rotatefile
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,10 +30,6 @@ func New(name string, rotate time.Duration, perm os.FileMode, lock bool) (f *Day
 	return
 }
 
-func (f *Dayfile) Writer(b []byte) (n int, err error) {
-	return f.WriteWithLock(b, f.mu != nil)
-}
-
 func (f *Dayfile) WriteWithLock(b []byte, lock bool) (n int, err error) {
 	if lock && f.mu != nil {
 		f.mu.Lock()
@@ -57,9 +52,6 @@ func (f *Dayfile) WriteWithLock(b []byte, lock bool) (n int, err error) {
 		}
 
 		f.next = now.Add(f.rotate).Truncate(f.rotate)
-		fmt.Println("f.next: 轮转", f.next.Format(time.TimeOnly))
-		fmt.Println("file:", strings.Join([]string{dir, "/", name, "_", format, ext}, ""))
-
 		f.file, err = os.OpenFile(
 			strings.Join([]string{dir, "/", name, "_", format, ext}, ""),
 			os.O_CREATE|os.O_WRONLY|os.O_APPEND,
@@ -72,4 +64,8 @@ func (f *Dayfile) WriteWithLock(b []byte, lock bool) (n int, err error) {
 	}
 
 	return
+}
+
+func (f *Dayfile) Writer(b []byte) (n int, err error) {
+	return f.WriteWithLock(b, f.mu != nil)
 }
