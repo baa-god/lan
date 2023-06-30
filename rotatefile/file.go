@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type Dayfile struct {
+type File struct {
 	Filename string
 	file     *os.File
 	perm     os.FileMode
@@ -19,10 +19,10 @@ type Dayfile struct {
 	rotate time.Duration
 }
 
-func New(name string, rotate time.Duration, perm os.FileMode, lock bool) (f *Dayfile, err error) {
+func New(name string, rotate time.Duration, perm os.FileMode, lock bool) (f *File, err error) {
 	err = os.MkdirAll(filepath.Dir(name), perm)
 	if err == nil || errors.Is(err, os.ErrExist) {
-		f = &Dayfile{Filename: name, rotate: rotate}
+		f = &File{Filename: name, rotate: rotate}
 		if err = nil; lock {
 			f.mu = &sync.Mutex{}
 		}
@@ -30,7 +30,7 @@ func New(name string, rotate time.Duration, perm os.FileMode, lock bool) (f *Day
 	return
 }
 
-func (f *Dayfile) WriteWithLock(b []byte, lock bool) (n int, err error) {
+func (f *File) WriteWithLock(b []byte, lock bool) (n int, err error) {
 	if lock && f.mu != nil {
 		f.mu.Lock()
 		defer f.mu.Unlock()
@@ -66,6 +66,6 @@ func (f *Dayfile) WriteWithLock(b []byte, lock bool) (n int, err error) {
 	return
 }
 
-func (f *Dayfile) Writer(b []byte) (n int, err error) {
+func (f *File) Writer(b []byte) (n int, err error) {
 	return f.WriteWithLock(b, f.mu != nil)
 }
