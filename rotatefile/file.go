@@ -66,6 +66,6 @@ func (f *File) WriteWithLock(b []byte, lock bool) (n int, err error) {
 	return
 }
 
-func (f *File) Writer(b []byte) (n int, err error) {
+func (f *File) Write(b []byte) (n int, err error) {
 	return f.WriteWithLock(b, f.mu != nil)
 }
