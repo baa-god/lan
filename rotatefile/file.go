@@ -36,7 +36,7 @@ func (f *File) WriteWithLock(b []byte, lock bool) (n int, err error) {
 		defer f.mu.Unlock()
 	}
 
-	if now := time.Now(); now.After(f.next) {
+	if now := time.Now().In(time.UTC); now.After(f.next) {
 		if f.file != nil { // 打开过的文件
 			_ = f.file.Close()
 		}
@@ -47,7 +47,7 @@ func (f *File) WriteWithLock(b []byte, lock bool) (n int, err error) {
 		name := strings.TrimSuffix(base, ext) // name
 
 		format := now.Format(time.DateOnly + "_15")
-		if f.rotate >= time.Hour*24 {
+		if f.rotate >= time.Hour*12 {
 			format = now.Format(time.DateOnly)
 		}
 
@@ -66,6 +66,6 @@ func (f *File) WriteWithLock(b []byte, lock bool) (n int, err error) {
 	return
 }
 
-func (f *File) Write(b []byte) (n int, err error) {
-	return f.WriteWithLock(b, f.mu != nil)
+func (f *File) Write(p []byte) (n int, err error) {
+	return f.WriteWithLock(p, f.mu != nil)
 }
