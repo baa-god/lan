@@ -100,7 +100,7 @@ func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 		go func() {
 			time.Sleep(time.Minute)
 			mu.Lock()
-			mu.Unlock()
+			defer mu.Unlock()
 			delete(caches, p.Signed)
 		}()
 
