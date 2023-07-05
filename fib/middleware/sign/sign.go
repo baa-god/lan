@@ -97,12 +97,11 @@ func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 		defer mu.Unlock()
 		caches[p.Signed] = true
 
-		go func() {
-			time.Sleep(time.Minute)
+		time.AfterFunc(time.Minute, func() {
 			mu.Lock()
 			defer mu.Unlock()
 			delete(caches, p.Signed)
-		}()
+		})
 
 		retSecret(c, useSecret)
 		return c.Next()

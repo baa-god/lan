@@ -54,12 +54,11 @@ func New(config ...Config) fiber.Handler {
 				Time:    time.Now(),
 			}
 
-			go func() {
-				time.Sleep(f.Duration)
+			time.AfterFunc(f.Duration, func() {
 				mu.Lock()
-				mu.Unlock()
+				defer mu.Unlock()
 				delete(blacklist, key)
-			}()
+			})
 
 			blacklist[key] = limit
 		}
