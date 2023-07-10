@@ -17,14 +17,12 @@ type Config struct {
 	Reached  func(*fiber.Ctx, time.Duration) error
 }
 
-var (
-	caches = lan.SyncMap[string, *Limiter]{}
-)
-
 type Limiter struct {
 	*rate.Limiter
 	Time time.Time
 }
+
+var caches = lan.SyncMap[string, *Limiter]{}
 
 func New(config ...Config) fiber.Handler {
 	if config == nil {

@@ -22,9 +22,7 @@ type Param struct {
 	Params map[string]any
 }
 
-var (
-	caches = lan.SyncMap[string, bool]{}
-)
+var caches = lan.SyncMap[string, bool]{}
 
 func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 	return func(c *fiber.Ctx) (err error) {
