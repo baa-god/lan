@@ -11,5 +11,7 @@ func (m *SyncMap[K, V]) Store(key K, value V) {
 }
 
 func (m *SyncMap[K, V]) Load(key K) (value V, ok bool) {
-	return m.Map.Load(key)
+	v, _ := m.Map.Load(key)
+	value, ok = v.(V)
+	return
 }
