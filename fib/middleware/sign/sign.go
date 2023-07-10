@@ -3,8 +3,8 @@ package sign
 import (
 	"bytes"
 	"fmt"
+	"github.com/baa-god/lan/lan"
 	"github.com/baa-god/lan/strs"
-	"github.com/baa-god/lan/typ"
 	"github.com/bytedance/sonic"
 	"github.com/elliotchance/pie/v2"
 	"github.com/gofiber/fiber/v2"
@@ -23,7 +23,7 @@ type Param struct {
 }
 
 var (
-	caches = typ.SyncMap[string, bool]{}
+	caches = lan.SyncMap[string, bool]{}
 )
 
 func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {

@@ -1,7 +1,7 @@
 package limiter
 
 import (
-	"github.com/baa-god/lan/typ"
+	"github.com/baa-god/lan/lan"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/time/rate"
 	"time"
@@ -18,7 +18,7 @@ type Config struct {
 }
 
 var (
-	caches = typ.SyncMap[string, *Limiter]{}
+	caches = lan.SyncMap[string, *Limiter]{}
 )
 
 type Limiter struct {
