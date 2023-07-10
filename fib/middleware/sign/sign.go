@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/baa-god/lan/strs"
+	"github.com/baa-god/lan/typ"
 	"github.com/bytedance/sonic"
 	"github.com/elliotchance/pie/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/cast"
 	"golang.org/x/exp/maps"
 	"time"
-
-	"sync"
 	// "time"
 )
 
@@ -24,8 +23,7 @@ type Param struct {
 }
 
 var (
-	mu     sync.Mutex
-	caches = map[string]bool{}
+	caches = typ.SyncMap[string, bool]{}
 )
 
 func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
@@ -89,18 +87,13 @@ func New(secrets []string, retSecret func(*fiber.Ctx, string)) fiber.Handler {
 			}
 		}
 
-		if _, ok := caches[p.Signed]; ok || !allow {
+		if _, ok := caches.Load(p.Signed); ok || !allow {
 			return c.Status(403).SendString("sign error!")
 		}
 
-		mu.Lock()
-		defer mu.Unlock()
-		caches[p.Signed] = true
-
+		caches.Store(p.Signed, true)
 		time.AfterFunc(time.Minute, func() {
-			mu.Lock()
-			defer mu.Unlock()
-			delete(caches, p.Signed)
+			caches.Delete(p.Signed)
 		})
 
 		retSecret(c, useSecret)

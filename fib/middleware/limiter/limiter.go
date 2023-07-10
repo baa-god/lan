@@ -1,9 +1,9 @@
 package limiter
 
 import (
+	"github.com/baa-god/lan/typ"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/time/rate"
-	"sync"
 	"time"
 )
 
@@ -18,8 +18,7 @@ type Config struct {
 }
 
 var (
-	mu        sync.Mutex
-	blacklist = map[string]*Limiter{}
+	caches = typ.SyncMap[string, *Limiter]{}
 )
 
 type Limiter struct {
@@ -43,24 +42,18 @@ func New(config ...Config) fiber.Handler {
 		}
 
 		key := f.Key(c)
-		limit, _ := blacklist[key]
+		limit, _ := caches.Load(key)
 
 		if limit == nil {
-			mu.Lock()
-			defer mu.Unlock()
-
 			limit = &Limiter{
 				Limiter: rate.NewLimiter(f.Limit, f.Burst),
 				Time:    time.Now(),
 			}
 
+			caches.Store(key, limit)
 			time.AfterFunc(f.Duration, func() {
-				mu.Lock()
-				defer mu.Unlock()
-				delete(blacklist, key)
+				caches.Delete(key)
 			})
-
-			blacklist[key] = limit
 		}
 
 		if !limit.Allow() {
