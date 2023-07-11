@@ -43,12 +43,10 @@ func New(config ...Config) fiber.Handler {
 			return f.Failed(c, err)
 		}
 
-		if f.Succeed != nil {
-			if err = f.Succeed(c, claims); err == nil {
-				c.Locals("user", claims)
-			}
+		if c.Locals("user", claims); f.Succeed == nil {
+			return c.Next()
 		}
 
-		return
+		return f.Succeed(c, claims)
 	}
 }
